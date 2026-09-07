@@ -70,14 +70,37 @@ static const osThreadAttr_t uartTaskAttributes = {
   .priority = (osPriority_t) osPriorityBelowNormal,
 };
 
+static osThreadId_t ledTaskHandle;
+static osThreadId_t uartTaskHandle;
+
+static void PrintMemoryUsage(void)
+{
+  UBaseType_t ledFreeWords = uxTaskGetStackHighWaterMark((TaskHandle_t)ledTaskHandle);
+  UBaseType_t uartFreeWords = uxTaskGetStackHighWaterMark((TaskHandle_t)uartTaskHandle);
+  size_t freeHeapBytes = xPortGetFreeHeapSize();
+  size_t usedHeapBytes = configTOTAL_HEAP_SIZE - freeHeapBytes;
+
+  printf("LedTask stack: %lu/%lu bytes used\r\n",
+         (unsigned long)(ledTaskAttributes.stack_size - (ledFreeWords * sizeof(StackType_t))),
+         (unsigned long)ledTaskAttributes.stack_size);
+  printf("UartTask stack: %lu/%lu bytes used\r\n",
+         (unsigned long)(uartTaskAttributes.stack_size - (uartFreeWords * sizeof(StackType_t))),
+         (unsigned long)uartTaskAttributes.stack_size);
+  printf("Heap: %lu/%lu bytes used\r\n",
+         (unsigned long)usedHeapBytes,
+         (unsigned long)configTOTAL_HEAP_SIZE);
+}
+
 void AppTasks_Init(void)
 {
-  if (osThreadNew(LedTask, NULL, &ledTaskAttributes) == NULL)
+  ledTaskHandle = osThreadNew(LedTask, NULL, &ledTaskAttributes);
+  if (ledTaskHandle == NULL)
   {
     Error_Handler();
   }
 
-  if (osThreadNew(UartTask, NULL, &uartTaskAttributes) == NULL)
+  uartTaskHandle = osThreadNew(UartTask, NULL, &uartTaskAttributes);
+  if (uartTaskHandle == NULL)
   {
     Error_Handler();
   }
@@ -101,6 +124,7 @@ static void UartTask(void *argument)
   for (;;)
   {
     printf("UART task is running\r\n");
+    PrintMemoryUsage();
     osDelay(1000);
   }
 }
