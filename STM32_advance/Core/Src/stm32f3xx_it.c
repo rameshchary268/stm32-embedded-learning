@@ -173,6 +173,14 @@ void TIM1_UP_TIM16_IRQHandler(void)
   /* USER CODE END TIM1_UP_TIM16_IRQn 1 */
 }
 
+/**
+  * @brief This function handles EXTI line 15 to 10 interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(B1_Pin);
+}
+
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */

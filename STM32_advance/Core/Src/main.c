@@ -262,6 +262,8 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
@@ -273,6 +275,14 @@ int __io_putchar(int ch)
 
   HAL_UART_Transmit(&huart2, &data, 1, HAL_MAX_DELAY);
   return ch;
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == B1_Pin)
+  {
+    AppTasks_ButtonPressedFromISR();
+  }
 }
 
 /* USER CODE END 4 */

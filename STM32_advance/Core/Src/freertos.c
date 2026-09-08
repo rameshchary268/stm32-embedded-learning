@@ -53,6 +53,7 @@
 /* USER CODE BEGIN FunctionPrototypes */
 static void LedTask(void *argument);
 static void UartTask(void *argument);
+static void PrintMemoryUsage(void);
 
 /* USER CODE END FunctionPrototypes */
 
@@ -72,6 +73,14 @@ static const osThreadAttr_t uartTaskAttributes = {
 
 static osThreadId_t ledTaskHandle;
 static osThreadId_t uartTaskHandle;
+
+void AppTasks_ButtonPressedFromISR(void)
+{
+  BaseType_t higherPriorityTaskWoken = pdFALSE;
+
+  vTaskNotifyGiveFromISR((TaskHandle_t)uartTaskHandle, &higherPriorityTaskWoken);
+  portYIELD_FROM_ISR(higherPriorityTaskWoken);
+}
 
 static void PrintMemoryUsage(void)
 {
@@ -123,9 +132,9 @@ static void UartTask(void *argument)
 
   for (;;)
   {
-    printf("UART task is running\r\n");
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    printf("Button pressed - memory usage:\r\n");
     PrintMemoryUsage();
-    osDelay(1000);
   }
 }
 
